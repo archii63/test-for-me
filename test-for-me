@@ -36,4 +36,7 @@ body:
       label: Steps to Reproduce or Propose
       description: For bugs, provide reproduction steps. For features/chore, outline the expected change.
     validations:
-      required: false
+      description: File any issue related to the gateway-contracts component
+title: "<issue_type>(gateway-contracts): short description"
+labels: ["gateway-contracts"]
+projects: ["zama-ai/31"] # fhevm project
