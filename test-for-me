@@ -29,7 +29,8 @@ body:
       description: Any additional information, context, or links that help understand the issue
     validations:
       required: false
-
+ url: https://community.zama.ai
+    about: Ask in the Zama community forum
   - type: textarea
     id: steps
     attributes:
