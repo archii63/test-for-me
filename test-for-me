@@ -27,7 +27,9 @@ body:
     id: context
     attributes:
       label: Context
-      description: Any additional information, context, or links that help understand the issue
+      description: - name: Questions & Support Requests
+    url: https://community.zama.ai
+    about: Ask in the Zamal information, context, or links that help understand the issue
     validations:
       required: false
  url: https://community.zama.ai
