@@ -35,7 +35,11 @@ name: "Gateway Contracts Issue
     validations:
       required: false
  url: https://community.zama.ai
-    about: Ask in the Zama community forum
+    about: Ask in 
+name: "Gateway Contracts Issue"
+description: File any issue related to the gateway-contracts component
+title: "<issue_type>(gateway-contracts): short description"
+labels: ["gateway-contracts"]the Zama community forum
   - type: textarea
     id: steps
     attributes:
