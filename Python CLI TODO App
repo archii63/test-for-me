@@ -81,7 +81,8 @@ Run tests with pytest:
 python -m pip install --user pytest
 pytest -q
 ```
-
+ list, complete, and remove TODO items.
+- Stores data in a loca
 ## License
 
 MIT
