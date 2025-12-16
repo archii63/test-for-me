@@ -147,6 +147,10 @@ license = { text = "MIT" }
 authors = [ { name = "Your Name" } ]
 ```
 
+## Tests
+
+Run tests with pytest:
+
 ---
 
 ## Source code
