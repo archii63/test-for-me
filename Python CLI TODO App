@@ -3,7 +3,16 @@
 
 A small, well-documented Python command-line TODO application ready to publish on GitHub.
 
----
+---- Add, list, complete, and remove TODO items.
+- Stores data in a local JSON file (`~/.todo_cli.json`).
+- Small and easy-to-read codebase with tests.
+
+## Requirements
+
+- Python 3.8+
+
+## Quickstart
+
 
 ## Project structure
 
@@ -34,15 +43,6 @@ A tiny, dependency-free command-line TODO application in Python. Perfect as a Gi
 
 ## Features
 
-- Add, list, complete, and remove TODO items.
-- Stores data in a local JSON file (`~/.todo_cli.json`).
-- Small and easy-to-read codebase with tests.
-
-## Requirements
-
-- Python 3.8+
-
-## Quickstart
 
 1. Clone the repository:
 
