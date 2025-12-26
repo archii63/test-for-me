@@ -12,7 +12,12 @@ A small, well-documented Python command-line TODO application ready to publish o
 - Python 3.8+
 
 ## Quickstart
+````markdown
+# TODO CLI
 
+A tiny, dependency-free command-line TODO application in Python. Perfect as a GitHub project template for beginners.
+
+## Features
 
 ## Project structure
 
@@ -36,12 +41,6 @@ todo-cli/
 
 ## README.md (English)
 
-````markdown
-# TODO CLI
-
-A tiny, dependency-free command-line TODO application in Python. Perfect as a GitHub project template for beginners.
-
-## Features
 
 
 1. Clone the repository:
