@@ -37,6 +37,9 @@ todo-cli/
     └── ISSUE_TEMPLATE.md
 ```
 
+## Requirements
+
+- Python 3.8+
 ---- Add, list, complete, and remove TODO items.
 - Stores data in a local JSON file (`~/.todo_cli.json`).
 - Small and easy-to-read codebase with tests.
