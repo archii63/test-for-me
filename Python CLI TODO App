@@ -1,6 +1,10 @@
 
 # Python CLI TODO App
 
+---- Add, list, complete, and remove TODO items.
+- Stores data in a local JSON file (`~/.todo_cli.json`).
+- Small and easy-to-read codebase with tests.
+
 A small, well-documented Python command-line TODO application ready to publish on GitHub.
 
 ---- Add, list, complete, and remove TODO items.
