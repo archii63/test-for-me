@@ -25,6 +25,10 @@ A tiny, dependency-free command-line TODO application in Python. Perfect as a Gi
 
 ## Project structure
 
+def count_characters(text: str) -> int:
+    """Return the number of characters (excluding spaces)."""
+    return len(text.replace(" ", ""))
+
 ```
 todo-cli/
 ├── README.md
