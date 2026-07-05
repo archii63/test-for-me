@@ -7,12 +7,6 @@
 
 A small, well-documented Python command-line TODO application ready to publish on GitHub.
 
----- Add, list, complete, and remove TODO items.
-- Stores data in a local JSON file (`~/.todo_cli.json`).
-- Small and easy-to-read codebase with tests.
-
-## Requirements
-
 - Python 3.8+
 
 ## Quickstart
@@ -29,6 +23,11 @@ def count_characters(text: str) -> int:
     """Return the number of characters (excluding spaces)."""
     return len(text.replace(" ", ""))
 
+---- Add, list, complete, and remove TODO items.
+- Stores data in a local JSON file (`~/.todo_cli.json`).
+- Small and easy-to-read codebase with tests.
+
+## Requirements
 ```
 todo-cli/
 ├── README.md
