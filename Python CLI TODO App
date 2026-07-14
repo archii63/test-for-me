@@ -19,13 +19,6 @@ A tiny, dependency-free command-line TODO application in Python. Perfect as a Gi
 
 ## Project structure
 
-def count_characters(text: str) -> int:
-    """Return the number of characters (excluding spaces)."""
-    return len(text.replace(" ", ""))
-
----- Add, list, complete, and remove TODO items.
-- Stores data in a local JSON file (`~/.todo_cli.json`).
-- Small and easy-to-read codebase with tests.
 
 ## Requirements
 ```
@@ -53,17 +46,13 @@ todo-cli/
 
 ---
 
-## README.md (English)
+def count_characters(text: str) -> int:
+    """Return the number of characters (excluding spaces)."""
+    return len(text.replace(" ", ""))
 
-
-
-1. Clone the repository:
-
-```bash
-git clone https://github.com/<your-username>/todo-cli.git
-cd todo-cli
-````
-
+---- Add, list, complete, and remove TODO items.
+- Stores data in a local JSON file (`~/.todo_cli.json`).
+- Small and easy-to-read codebase with tests.
 2. Install (optional):
 
 ```bash
