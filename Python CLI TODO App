@@ -1,173 +1,363 @@
+#!/usr/bin/env python3
 
-# Python CLI TODO App
+"""
+Nexora - Repository Intelligence CLI
 
----- Add, list, complete, and remove TODO items.
-- Stores data in a local JSON file (`~/.todo_cli.json`).
-- Small and easy-to-read codebase with tests.
+A lightweight, dependency-free tool for analyzing software repositories.
 
-A small, well-documented Python command-line TODO application ready to publish on GitHub.
+Features:
+- Language statistics
+- File and line counts
+- Largest files detection
+- Empty file detection
+- Directory structure analysis
+- JSON output for CI/CD pipelines
+- Configurable ignored directories
 
-- Python 3.8+
+Usage:
+    python nexora.py /path/to/repository
+    python nexora.py . --top 10
+    python nexora.py . --json
+"""
 
-## Quickstart
-````markdown
-# TODO CLI
+from __future__ import annotations
 
-A tiny, dependency-free command-line TODO application in Python. Perfect as a GitHub project template for beginners.
-
-## Features
-
-## Project structure
+import argparse
+import json
+import os
+from collections import Counter, defaultdict
+from pathlib import Path
 
 
-## Requirements
-```
-todo-cli/
-├── README.md
-├── LICENSE
-├── .gitignore
-├── pyproject.toml
-├── todo/
-│   ├── __init__.py
-│   ├── cli.py
-│   └── store.py
-├── tests/
-│   └── test_store.py
-└── .github/
-    └── ISSUE_TEMPLATE.md
-```
+LANGUAGE_MAP = {
+    ".py": "Python",
+    ".js": "JavaScript",
+    ".ts": "TypeScript",
+    ".tsx": "TypeScript",
+    ".jsx": "JavaScript",
+    ".java": "Java",
+    ".go": "Go",
+    ".rs": "Rust",
+    ".cpp": "C++",
+    ".cc": "C++",
+    ".c": "C",
+    ".h": "C/C++ Header",
+    ".hpp": "C++ Header",
+    ".cs": "C#",
+    ".php": "PHP",
+    ".rb": "Ruby",
+    ".swift": "Swift",
+    ".kt": "Kotlin",
+    ".kts": "Kotlin",
+    ".sh": "Shell",
+    ".bash": "Shell",
+    ".zsh": "Shell",
+    ".sql": "SQL",
+    ".html": "HTML",
+    ".css": "CSS",
+    ".scss": "SCSS",
+    ".vue": "Vue",
+    ".dart": "Dart",
+    ".lua": "Lua",
+    ".r": "R",
+    ".ex": "Elixir",
+    ".exs": "Elixir",
+    ".fs": "F#",
+    ".fsx": "F#",
+}
 
-## Requirements
+DEFAULT_IGNORED = {
+    ".git",
+    ".github",
+    ".idea",
+    ".vscode",
+    "node_modules",
+    "venv",
+    ".venv",
+    "env",
+    ".env",
+    "__pycache__",
+    "dist",
+    "build",
+    "target",
+    ".next",
+    ".nuxt",
+    "coverage",
+}
 
-- Python 3.8+
----- Add, list, complete, and remove TODO items.
-- Stores data in a local JSON file (`~/.todo_cli.json`).
-- Small and easy-to-read codebase with tests.
 
----
+def count_lines(path: Path) -> int:
+    """Count lines safely using UTF-8 with replacement for invalid bytes."""
+    try:
+        with path.open("r", encoding="utf-8", errors="replace") as file:
+            return sum(1 for _ in file)
+    except (OSError, UnicodeError):
+        return 0
 
-def count_characters(text: str) -> int:
-    """Return the number of characters (excluding spaces)."""
-    return len(text.replace(" ", ""))
 
----- Add, list, complete, and remove TODO items.
-- Stores data in a local JSON file (`~/.todo_cli.json`).
-- Small and easy-to-read codebase with tests.
-2. Install (optional):
+def is_binary(path: Path) -> bool:
+    """Detect likely binary files without external dependencies."""
+    try:
+        with path.open("rb") as file:
+            chunk = file.read(8192)
 
-```bash
-python -m pip install --user .
-```
+        return b"\x00" in chunk
+    except OSError:
+        return True
 
-3. Use the CLI:
 
-```bash
-# add an item
-python -m todo.cli add "Buy milk"
+def analyze_repository(
+    root: Path,
+    ignored: set[str],
+    top_files: int,
+) -> dict:
+    """Analyze repository files and return structured statistics."""
 
-# list items
-python -m todo.cli list
+    language_files = Counter()
+    language_lines = Counter()
+    directory_files = Counter()
+    largest_files = []
+    empty_files = []
 
-# mark item 1 as done
-python -m todo.cli done 1
+    total_files = 0
+    total_lines = 0
+    skipped_files = 0
 
-# remove item 1
-python -m todo.cli remove 1
-```
+    for current_root, directories, files in os.walk(root):
+        directories[:] = [
+            directory
+            for directory in directories
+            if directory not in ignored
+        ]
 
-## Tests
+        current_path = Path(current_root)
 
-Run tests with pytest:
+        for filename in files:
+            file_path = current_path / filename
 
-```bash
-python -m pip install --user pytest
-pytest -q
-```
- list, complete, and remove TODO items.
-- Stores data in a loca
-## License
+            try:
+                relative_path = file_path.relative_to(root)
+            except ValueError:
+                continue
 
-MIT
+            if any(part in ignored for part in relative_path.parts):
+                continue
 
-```
-```
+            if is_binary(file_path):
+                skipped_files += 1
+                continue
 
----
+            extension = file_path.suffix.lower()
+            language = LANGUAGE_MAP.get(extension, "Other")
 
-## LICENSE (MIT)
+            lines = count_lines(file_path)
 
-```text
-MIT License
+            total_files += 1
+            total_lines += lines
 
-Copyright (c) 2025 <your-name>
+            language_files[language] += 1
+            language_lines[language] += lines
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+            directory = str(relative_path.parent)
+            if directory == ".":
+                directory = "/"
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-```
+            directory_files[directory] += 1
 
----
+            try:
+                size = file_path.stat().st_size
+            except OSError:
+                size = 0
 
-## .gitignore
+            largest_files.append(
+                {
+                    "path": str(relative_path),
+                    "size_bytes": size,
+                    "lines": lines,
+                    "language": language,
+                }
+            )
 
-```text
-__pycache__/
-*.py[cod]
-*.egg-info/
-.env
-.vscode/
-.idea/
-```
+            if lines == 0:
+                empty_files.append(str(relative_path))
 
----
+    largest_files.sort(
+        key=lambda item: item["size_bytes"],
+        reverse=True,
+    )
 
-## pyproject.toml
+    largest_files = largest_files[:top_files]
 
-```toml
-[build-system]
-requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta"
+    languages = []
 
-[project]
-name = "todo-cli"
-version = "0.1.0"
-description = "Tiny CLI TODO app"
-readme = "README.md"
-requires-python = ">=3.8"
-license = { text = "MIT" }
-authors = [ { name = "Your Name" } ]
-```
+    for language, files_count in language_files.most_common():
+        languages.append(
+            {
+                "language": language,
+                "files": files_count,
+                "lines": language_lines[language],
+            }
+        )
 
-## Tests
+    directories = [
+        {
+            "directory": directory,
+            "files": count,
+        }
+        for directory, count in directory_files.most_common()
+    ]
 
-Run tests with pytest:
+    return {
+        "repository": root.name,
+        "total_files": total_files,
+        "total_lines": total_lines,
+        "skipped_binary_files": skipped_files,
+        "empty_files": empty_files,
+        "languages": languages,
+        "directories": directories,
+        "largest_files": largest_files,
+    }
 
----
 
-### `todo/store.py`
+def format_bytes(value: int) -> str:
+    """Convert bytes into a readable format."""
+    units = ["B", "KB", "MB", "GB"]
 
-```python
-"""Simple JSON-backed TODO store."""
-from __future
-```
-## Source code
+    size = float(value)
 
-### `todo/__init__.py`
+    for unit in units:
+        if size < 1024:
+            return f"{size:.1f} {unit}"
 
-```python
-"""TODO CLI package."""
+        size /= 1024
 
-__all__ = ["store", "cli"]
-```
+    return f"{size:.1f} TB"
 
+
+def print_report(report: dict) -> None:
+    """Print a human-readable repository report."""
+
+    print()
+    print("=" * 64)
+    print(f"  NEXORA — Repository Intelligence")
+    print("=" * 64)
+
+    print(f"\nRepository : {report['repository']}")
+    print(f"Files      : {report['total_files']:,}")
+    print(f"Lines      : {report['total_lines']:,}")
+    print(
+        f"Binary     : {report['skipped_binary_files']:,} skipped"
+    )
+
+    print("\nLanguage Breakdown")
+    print("-" * 64)
+
+    for item in report["languages"]:
+        print(
+            f"{item['language']:<20}"
+            f"{item['files']:>8} files"
+            f"{item['lines']:>12,} lines"
+        )
+
+    print("\nLargest Files")
+    print("-" * 64)
+
+    for item in report["largest_files"]:
+        print(
+            f"{item['path']:<42}"
+            f"{format_bytes(item['size_bytes']):>10}"
+            f"{item['lines']:>10,} lines"
+        )
+
+    if report["empty_files"]:
+        print("\nEmpty Files")
+        print("-" * 64)
+
+        for path in report["empty_files"]:
+            print(f"  {path}")
+
+    print("\nTop Directories")
+    print("-" * 64)
+
+    for item in report["directories"][:10]:
+        print(
+            f"{item['directory']:<45}"
+            f"{item['files']:>8} files"
+        )
+
+    print("\n" + "=" * 64)
+    print("  Analysis complete.")
+    print("=" * 64)
+    print()
+
+
+def parse_arguments() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Nexora - Repository Intelligence CLI"
+    )
+
+    parser.add_argument(
+        "path",
+        nargs="?",
+        default=".",
+        help="Repository path (default: current directory)",
+    )
+
+    parser.add_argument(
+        "--top",
+        type=int,
+        default=10,
+        help="Number of largest files to display",
+    )
+
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Output the report as JSON",
+    )
+
+    parser.add_argument(
+        "--ignore",
+        nargs="*",
+        default=[],
+        help="Additional directories to ignore",
+    )
+
+    return parser.parse_args()
+
+
+def main() -> int:
+    args = parse_arguments()
+
+    root = Path(args.path).resolve()
+
+    if not root.exists():
+        print(f"Error: path does not exist: {root}")
+        return 1
+
+    if not root.is_dir():
+        print(f"Error: path is not a directory: {root}")
+        return 1
+
+    if args.top < 1:
+        print("Error: --top must be greater than zero.")
+        return 1
+
+    ignored = DEFAULT_IGNORED | set(args.ignore)
+
+    report = analyze_repository(
+        root=root,
+        ignored=ignored,
+        top_files=args.top,
+    )
+
+    if args.json:
+        print(json.dumps(report, indent=2))
+    else:
+        print_report(report)
+
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
